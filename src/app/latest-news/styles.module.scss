@@ -1,0 +1,139 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // equivalent to min-h-screen
+  background-color: var(--background-color);
+}
+
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem; // equivalent to px-4 py-2
+  border-bottom: 1px solid #E2E8F0; // equivalent to border-b border-gray-200
+
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; // equivalent to gap-2
+
+    .icon {
+      height: 1.5rem; // equivalent to h-6
+      width: 1.5rem; // equivalent to w-6
+    }
+
+    .text {
+      font-size: 1.125rem; // equivalent to text-lg
+      font-weight: 600; // equivalent to font-semibold
+      color: var(--text-color); // equivalent to text-gray-800
+    }
+  }
+
+  .nav {
+    display: flex;
+    gap: 1rem; // equivalent to gap-4
+    color: var(--secondary-color);
+
+    .navLink {
+      font-size: 0.875rem; // equivalent to text-sm
+      font-weight: 500; // equivalent to font-medium
+      color: var(--text-color); // equivalent to text-gray-800
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .searchBar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; // equivalent to gap-2
+
+    .input {
+      width: 8rem; // equivalent to w-32
+    }
+
+    .button {
+      // Add styles specific to the button here
+    }
+  }
+}
+
+.main {
+  flex: 1;
+  padding: 1rem; // equivalent to p-4
+  @media (min-width: 768px) {
+    padding: 1.5rem; // equivalent to md:p-6
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem; // equivalent to gap-4
+    // Add Card component styles here
+  }
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; // equivalent to gap-2
+  padding: 1rem; // equivalent to py-4 px-4 md:px-6
+  border-top: 1px solid;
+  align-items: center;
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+
+  p {
+    font-size: 0.75rem; // equivalent to text-xs
+    color: var(--text-color); // equivalent to text-gray-500
+    }
+
+  .nav {
+    display: flex;
+    gap: 1rem; // equivalent to gap-4 sm:gap-6
+    margin-left: auto; // equivalent to sm:ml-auto
+
+    .navLink {
+      font-size: 0.75rem; // equivalent to text-xs
+      color: var(--text-color); // equivalent to text-gray-500
+      &:hover {
+        text-decoration: underline;
+        text-underline-offset: 4px; // equivalent to underline-offset-4
+      }
+    }
+  }
+}
+
+.switchBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .icon {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  .switch {
+    width: 2.5rem;
+    height: 1.5rem;
+  }
+}
+
+.content {
+  font-size: 0.875rem; // Equivalent to text-sm in Tailwind
+  line-height: 1.5;
+}
+
+.copyright {
+  font-size: 0.75rem; // Equivalent to text-xs in Tailwind
+  color: #718096; // Equivalent to text-gray-500 in Tailwind
+
+  @media (prefers-color-scheme: dark) {
+    color: #A0AEC0; // Equivalent to dark:text-gray-400 in Tailwind
+  }
+}
+
+
