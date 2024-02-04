@@ -133,4 +133,45 @@
     border-bottom-left-radius: 0;
 }
 
+.teamMember {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px; // Adjust as needed for spacing between rows
+}
+
+.teamMemberImage {
+    width: 100px; // Adjust as needed
+    height: 100px; // Adjust as needed
+    border-radius: 50%; // Makes the image circular
+    margin-right: 20px; // Space between image and text
+}
+
+.teamMemberInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.teamMemberName {
+    font-size: 1.25rem; // Example size, adjust as needed
+    font-weight: bold; // Example weight, adjust as needed
+    margin-bottom: 5px; // Space between name and description
+}
+
+.teamMemberDescription {
+    font-size: 1rem; // Example size, adjust as needed
+}
+
+
+.siteTitle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: 10px; // Adjust spacing as needed
+    font-size: 3rem; // Example size, adjust as needed
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; // Example font, adjust as needed
+    color: #0F172A; // Adjust to match your site's color scheme
+    font-weight: 600; // Adjust for desired font weight
+}
+
+
 
