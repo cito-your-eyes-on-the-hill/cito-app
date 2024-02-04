@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default function Component() {
 
+    const [isAboutOpen, setIsAboutOpen] = useState (false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedArticle, setSelectedArticle] = useState(null); // New state
     const [successMessage, setSuccessMessage] = useState('');
@@ -119,6 +120,9 @@ export default function Component() {
         setSelectedArticle(null); // Reset the article view when closing the modal
     };
 
+    const toggleAboutModal = () => setIsAboutOpen(!isAboutOpen);
+
+
     const handleReadMore = (article) => {
         setSelectedArticle(article); // Set the selected article
     };
@@ -128,6 +132,14 @@ export default function Component() {
         { id: 2, title: "News Title 2", description: "Brief description 2", content: "Full news content 2" },
         // Some dummy articles which we populate with our real api
     ];
+
+    const teamMembers = [
+        { id: 1, name: "Adriel", description: "This is a sample description. It is done to see how it would look on the website with the proper implementation.", imageUrl: "/profile1.png" },
+        { id: 2, name: "Nico", description: "Description 2", imageUrl: "/profile2.png" },
+        { id: 3, name: "Esteeven", description: "Description 3", imageUrl: "/profile3.png" },
+        { id: 4, name: "Bo", description: "Description 4", imageUrl: "/profile4.png" },
+    ];
+
 
     const displayMessage = (message, sender) => {
         // const chatWindow = document.querySelector(`.${style.chatWindow}`);
@@ -193,7 +205,8 @@ export default function Component() {
 
     return (
         <div key="1" className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-            <Button className="ml-auto mb-4 absolute top-0 right-0 m-4" size="sm">
+            <h1 className={style.siteTitle}>Cito.</h1>
+            <Button className="ml-auto mb-4 absolute top-0 right-0 m-4" size="sm" onClick={toggleAboutModal}>
                 About Us
             </Button>
             <div className="space-y-4">
@@ -208,7 +221,8 @@ export default function Component() {
                             type="text"
                             value={zipCode}
                             onChange={(e) => {
-                                setZipCode(e.target.value)}}
+                                setZipCode(e.target.value)
+                            }}
                         />
                         <Button type="submit">Submit</Button>
                     </form>
@@ -269,9 +283,9 @@ export default function Component() {
                     <>
                         <Button className={style.backButton}
                                 onClick={() => setSelectedArticle(null)}>
-                        <BackArrowIcon />
-                        Back
-                    </Button>
+                            <BackArrowIcon/>
+                            Back
+                        </Button>
                         <div className={style.articleContent}>
                             <div className={style.articleColumns}>
                                 <div className={style.articleColumn}>
@@ -288,6 +302,23 @@ export default function Component() {
                     </>
                 )}
             </Modal>
+
+            {/* About Us Modal */}
+            <Modal isOpen={isAboutOpen} onClose={toggleAboutModal}>
+                <h2 className="text-3xl font-bold text-center my-4">About Us</h2>
+                <div className={style.teamMembers}>
+                    {teamMembers.map((member) => (
+                        <div key={member.id} className={style.teamMember}>
+                            <img src={member.imageUrl} alt={member.name} className={style.teamMemberImage}/>
+                            <div className={style.teamMemberInfo}>
+                                <h3 className={style.teamMemberName}>{member.name}</h3>
+                                <p className={style.teamMemberDescription}>{member.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Modal>
+
         </div>
     )
 }
