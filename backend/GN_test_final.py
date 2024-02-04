@@ -191,8 +191,14 @@ def get_all_unique_zip():
     zips = [zip[0] for zip in zips]
     return zips
 
+import time
 
 zipCodes = get_all_unique_zip()
-
-for zipCode in zipCodes:
-    zip_article_search(zip_code=zipCode, search_phrase=["politics"], csv_name="news_scrape.csv")
+current_time = time.time()
+time_interval = 60*10
+while(True):
+    if(((time.time() - current_time()) / 600) < 1):
+        time.sleep(1)
+    else:
+        for zipCode in zipCodes:
+            zip_article_search(zip_code=zipCode, search_phrase=["politics"], csv_name="news_scrape.csv")
