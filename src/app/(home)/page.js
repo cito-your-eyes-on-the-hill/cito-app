@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter} from "next/navigation";
 import { Modal } from "@/components/Modal/modal";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import style from "./styles.module.scss";
 // import { doInsert } from "lib/database";
@@ -21,60 +21,91 @@ export default function Component() {
 
     const [zipCode, setZipCode] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [deviceID, setDeviceID] = useState(''); // New state
+    // const [deviceID, setDeviceID] = useState(''); // New state
+    const deviceID = useRef('');
 
     const isValidZipCode = (zipCode) => {
         const zipCodePattern = /^\d{5}(-\d{4})?$/;
         return zipCodePattern.test(zipCode);
     };
 
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                console.log('Service Worker Registered with scope:', registration.scope);
+            }).catch(function(err) {
+                console.error('Service Worker registration failed:', err);
+            });
+        }
+    }, []);
+
+
+    const requestNotificationPermission = async () => {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+            console.error("Permission not granted for Notification");
+            return null;
+        }
+        return await subscribeUserToPush();
+    };
+
+    const subscribeUserToPush = async () => {
+        const serviceWorker = await navigator.serviceWorker.ready;
+        return await serviceWorker.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: "BPAtx6LpjenJ8M3MhoCV04GVEcIcRL-N7D1WmyLNcADO3mxv0pefzc9t9417ABbx4IjMPCw_GXfk7ztYBJ2-29c"
+        });
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // Ensure the deviceId cookie is set
-        setDeviceID(setDeviceIdCookie())
-
-        console.log(deviceID)
-
-        // const deviceID = uuidv4(); // Generate a random UUID for phone ID
-        const apiUrl = `/api/add-user?`;
-
-
-        // Validate ZIP code before making an API call
         if (!isValidZipCode(zipCode)) {
             setSuccessMessage('')
             setErrorMessage('Invalid ZIP code entered.');
             return;
         } else {
             setSuccessMessage('ZIP code submitted successfully.');
-            setErrorMessage(''); // Clear error message on valid submission
+            setErrorMessage('');
         }
 
-        const params = new URLSearchParams({ deviceID: deviceID, zipCode: zipCode });
+        const subscription = await requestNotificationPermission();
+        if (!subscription) {
+            setErrorMessage('Failed to create notification subscription.');
+            return;
+        }
+
+        if(!deviceID.current) {
+            setDeviceIdCookie()
+        }
+
+        const params = new URLSearchParams({
+            deviceID: deviceID.current,
+            zipCode: zipCode,
+            subscription: JSON.stringify(subscription)
+        });
 
         try {
-            const response = await fetch(apiUrl + params);
-            console.log(response)
+            const response = await fetch("/api/add-user?" + params);
             const data = await response.json();
-
-
-            // Handle response here (e.g., show a success message)
             console.log(data);
         } catch (error) {
-            // Handle errors here (e.g., show an error message)
             console.error('Error submitting form:', error);
         }
     };
 
 
     const setDeviceIdCookie = () => {
-       setDeviceID(getCookie('deviceId'));
-       console.log(`Device ID: ${deviceID}`);
-        if (!deviceID) {
-            setDeviceID(uuidv4());
-            document.cookie = `deviceId=${deviceID}; path=/; max-age=31536000`; // Expires in 1 year
+        const deviceIDCookie = getCookie('deviceId');
+        if (!deviceIDCookie) {
+            deviceID.current = uuidv4();
+            document.cookie = `deviceId=${deviceID.current}; path=/; max-age=31536000`; // Expires in 1 year
         }
-        return deviceID;
+        else{
+            deviceID.current = deviceIDCookie;
+        }
+        console.log(`Device ID: ${deviceID.current}`)
+        return deviceID.current;
     };
 
     const getCookie = (name) => {
@@ -188,6 +219,25 @@ export default function Component() {
                         <div className="text-green-500 ml-2">{successMessage}</div>
                     )}
                 </div>
+                <Button type="sendNotification" onClick={async () => {
+                    const subscription = await requestNotificationPermission();
+                    if (subscription) {
+                        const params = new URLSearchParams({
+                            // subscription: JSON.stringify(subscription),
+                            subscription: JSON.stringify(subscription),
+                            payload: "This is a test notification"
+                        });
+                        try {
+                            const response = await fetch("/api/notification-push?" + params);
+                            const data = await response.json();
+                            console.log(data);
+                        } catch (error) {
+                            console.error('Error sending notification:', error);
+                        }
+                    }
+                }}>
+                    Send Notification
+                </Button>
                 <div className="w-full max-w-sm space-y-2">
                     <Button className="w-full" onClick={toggleModal}>
                         View Latest News
