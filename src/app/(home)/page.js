@@ -161,7 +161,7 @@ export default function Component() {
     const biasMapping = {
         0: 'right',
         1: 'right-center',
-        2: 'least',
+        2: 'neutral',
         3: 'left-center',
         4: 'left'
     };
@@ -170,17 +170,19 @@ export default function Component() {
 
         const displayLink = item.link.length > 50 ? item.link.substring(0, 50) + '...' : item.link;
 
-        // const textBias = biasMapping[item.bias];
+        const textBias = biasMapping[item.classifierNumber];
 
         // console.log(`Text Bias: ${textBias}`)
 
         // console.log(`Item: ${JSON.stringify(item)}`)
 
+        // console.log(item.classifierNumber)
+
         return {
             id: index + 1,
             title: item.title,
             description: item.text.substring(0, 100) + "...",
-            date: `${item.date} | Source: ${displayLink}`,
+            date: `${item.date} | Bias: ${textBias} | Source: ${displayLink}`,
             fullLink: item.link,
             fullText: item.summary,
         };
