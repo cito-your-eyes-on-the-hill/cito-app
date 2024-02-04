@@ -11,6 +11,7 @@ import style from "./styles.module.scss";
 // import { doSelect } from "../../../lib/database";
 // import {articleData} from "../../../lib/articleData";
 import { v4 as uuidv4 } from 'uuid';
+import OpenAI from "openai";
 
 
 
@@ -27,6 +28,8 @@ export default function Component() {
     const [errorMessage, setErrorMessage] = useState('');
     // const [deviceID, setDeviceID] = useState(''); // New state
     const deviceID = useRef('');
+
+    const openai = new OpenAI({ apiKey: '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', dangerouslyAllowBrowser: true});
 
     const isValidZipCode = (zipCode) => {
         const zipCodePattern = /^\d{5}(-\d{4})?$/;
@@ -155,17 +158,17 @@ export default function Component() {
         console.log(`Article Data: ${articleData}z`)
     }, []);
 
-    const articles = articleData.map((item, index) => {
-        // // Extracting the source link from the text
-        // const linkRegex = /href="(.*?)"/;
-        // const linkMatch = item.text.match(linkRegex);
-        // const sourceLink = linkMatch ? linkMatch[1] : '';
+    const articles = articleData.slice(1, 4).map((item, index) => {
+
+        const displayLink = item.link.length > 50 ? item.link.substring(0, 50) + '...' : item.link;
 
         return {
             id: index + 1,
             title: item.title,
-            description: item.text.replace(/<[^>]*>?/gm, ''), // Remove HTML tags
-            date: `${item.date} | Source: ${item.link}`,
+            description: item.text.substring(0, 100) + "...",
+            date: `${item.date} | Source: ${displayLink}`,
+            fullLink: item.link,
+            fullText: item.summary
         };
     });
 
@@ -195,30 +198,47 @@ export default function Component() {
         messageInput.disabled = isDisabled;
     };
 
-    function processUserMessage() {
+    async function processUserMessage() {
         const messageInput = document.querySelector(`.${style.textInput}`);
         const userMessage = messageInput.value.trim();
+
         if (userMessage) {
             displayMessage(userMessage, 'user');
             messageInput.value = '';
             toggleInputState(true);
 
-            // Simulate API call and response
-            setTimeout(() => {
-                const apiResponse = "This is a response from the API.";
+            try {
+                const completion = await openai.chat.completions.create({
+                    messages: [{
+                        role: "system",
+                        content: `You are educated on politics and are completely unbiased. You will only answer questions or respond to questions that are based on the article you are provided. You will answer in a non-biased and informative manner. You will also use your training knowledge to answer questions. Here is the article ${selectedArticle.text}`
+                    }, {
+                        role: "user",
+                        content: `${userMessage}`
+                    }],
+                    model: "gpt-4-0125-preview",
+                });
+
+                const apiResponse = completion.choices[0].message.content;
+
                 displayMessage(apiResponse, 'api');
+            } catch (error) {
+                console.error('Error fetching OpenAI completion:', error);
+                // Handle the error appropriately
+            } finally {
                 toggleInputState(false);
-            }, 100); // Simulating  delay for API response
+            }
         }
     }
+
 
     useEffect(() => {
         const messageInput = document.querySelector(`.${style.textInput}`);
 
         if (messageInput) {
-            const handleKeyDown = (event) => {
+            const handleKeyDown = async(event) => {
                 if (event.key === 'Enter') {
-                    processUserMessage();
+                    await processUserMessage();
                 }
             };
 
@@ -308,7 +328,11 @@ export default function Component() {
                                         <CardDescription>{article.description}</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className={style.content}>{article.date}</p>
+                                        <p className={style.content}>
+                                            <a href={article.fullLink} target="_blank" rel="noopener noreferrer">
+                                                {article.date}
+                                            </a>
+                                        </p>
                                     </CardContent>
                                     <CardFooter>
                                         <Button size="sm" onClick={() => handleReadMore(article)}>Read More</Button>
@@ -327,7 +351,7 @@ export default function Component() {
                         <div className={style.articleContent}>
                             <div className={style.articleColumns}>
                                 <div className={style.articleColumn}>
-                                    <h2>{selectedArticle.summary}</h2>
+                                    <h2>{selectedArticle.fullText}</h2>
                                 </div>
                                 <div id="chatWindow" className={style.articleColumn}>
                                 </div>

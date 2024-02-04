@@ -17,7 +17,7 @@ from openai import OpenAI
 import time
 from joblib import load
 
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 
 def isNaN(string):
@@ -172,7 +172,7 @@ def summarize_article(article_text):
         messages=[
             {"role": "system", "content": "You are a politically unbiased summarizer."},
             {"role": "user",
-             "content": f"Your job is to summarize the following text from an article, the order might be a bit off or missing sentences. You will not include anything else in your response other than the summary of the article. If there is not enough content, return an empty string. Here is the text:\n{article_text}"},
+             "content": f"Your job is to summarize the following text from an article, the order might be a bit off or missing sentences. You will not include anything else in your response other than the summary of the article. If there is not enough content, use your knowledge to expand. You will not take away any info from the article but rather remove biased language and replace it with non biased language. Add additional non-biased information from your training set when summarizing. Here is the text:\n{article_text}"},
         ]
     )
 
