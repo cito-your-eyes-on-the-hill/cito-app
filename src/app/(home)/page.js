@@ -8,6 +8,8 @@ import React, {useEffect, useState, useRef} from "react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import style from "./styles.module.scss";
 // import { doInsert } from "lib/database";
+// import { doSelect } from "../../../lib/database";
+// import {articleData} from "../../../lib/articleData";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -18,6 +20,7 @@ export default function Component() {
     const [selectedArticle, setSelectedArticle] = useState(null); // New state
     const [successMessage, setSuccessMessage] = useState('');
 
+    const [articleData, setArticleData] = useState([]); // New state
 
     const [zipCode, setZipCode] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -123,11 +126,45 @@ export default function Component() {
         setSelectedArticle(article); // Set the selected article
     };
 
-    const articles = [
-        { id: 1, title: "News Title 1", description: "Brief description 1", content: "Full news content 1" },
-        { id: 2, title: "News Title 2", description: "Brief description 2", content: "Full news content 2" },
-        // Some dummy articles which we populate with our real api
-    ];
+    const articleDataFunc = async () => {
+        try {
+            const response = await fetch("/api/article-data?");
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            console.log(data);
+            return data.articleData; // Assuming your API returns an object with an articleData property
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    };
+
+
+    useEffect(() => {
+        // Fetch articles when the component mounts
+        articleDataFunc().then(data => {
+            setArticleData(data);
+        }).catch(error => {
+            console.error('Failed to fetch articles:', error);
+        });
+        console.log(`Article Data: ${articleData}z`)
+    }, []);
+
+    const articles = articleData.map((item, index) => {
+        // // Extracting the source link from the text
+        // const linkRegex = /href="(.*?)"/;
+        // const linkMatch = item.text.match(linkRegex);
+        // const sourceLink = linkMatch ? linkMatch[1] : '';
+
+        return {
+            id: index + 1,
+            title: item.title,
+            description: item.text.replace(/<[^>]*>?/gm, ''), // Remove HTML tags
+            date: `${item.date} | Source: ${item.link}`,
+        };
+    });
+
 
     const displayMessage = (message, sender) => {
         // const chatWindow = document.querySelector(`.${style.chatWindow}`);
@@ -256,7 +293,7 @@ export default function Component() {
                                         <CardDescription>{article.description}</CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className={style.content}>{article.content}</p>
+                                        <p className={style.content}>{article.date}</p>
                                     </CardContent>
                                     <CardFooter>
                                         <Button size="sm" onClick={() => handleReadMore(article)}>Read More</Button>
@@ -275,7 +312,7 @@ export default function Component() {
                         <div className={style.articleContent}>
                             <div className={style.articleColumns}>
                                 <div className={style.articleColumn}>
-                                    Some Text In Here
+                                    <h2>{selectedArticle.summary}</h2>
                                 </div>
                                 <div id="chatWindow" className={style.articleColumn}>
                                 </div>

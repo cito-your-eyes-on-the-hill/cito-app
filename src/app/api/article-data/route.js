@@ -4,7 +4,9 @@ import { doInsert, doSelect, doUpdate} from "../../../../lib/database";
 export async function GET(request) {
     const url = new URL(request.url);
 
-    const articleData = doSelect("citoData", "articles", ["title", "text", "summary", "date", "link"])
+    const articleData = await doSelect("citoData", "Articles", ["title", "text", "summary", "date", "link"])
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    console.log("articleData: ", articleData)
+
+    return NextResponse.json({ articleData }, { status: 200 });
 }
