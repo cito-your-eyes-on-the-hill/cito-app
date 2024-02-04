@@ -16,6 +16,7 @@ export default function Component() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedArticle, setSelectedArticle] = useState(null); // New state
+    const [successMessage, setSuccessMessage] = useState('');
 
 
     const [zipCode, setZipCode] = useState('');
@@ -41,9 +42,11 @@ export default function Component() {
 
         // Validate ZIP code before making an API call
         if (!isValidZipCode(zipCode)) {
+            setSuccessMessage('')
             setErrorMessage('Invalid ZIP code entered.');
             return;
         } else {
+            setSuccessMessage('ZIP code submitted successfully.');
             setErrorMessage(''); // Clear error message on valid submission
         }
 
@@ -53,6 +56,7 @@ export default function Component() {
             const response = await fetch(apiUrl + params);
             console.log(response)
             const data = await response.json();
+
 
             // Handle response here (e.g., show a success message)
             console.log(data);
@@ -179,6 +183,9 @@ export default function Component() {
                     </form>
                     {errorMessage && (
                         <div className="text-red-500 ml-2">{errorMessage}</div>
+                    )}
+                    {successMessage && (
+                        <div className="text-green-500 ml-2">{successMessage}</div>
                     )}
                 </div>
                 <div className="w-full max-w-sm space-y-2">
