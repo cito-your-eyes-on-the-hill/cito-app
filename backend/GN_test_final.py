@@ -14,6 +14,7 @@ import feedparser
 from bs4 import BeautifulSoup
 import sqlite3
 from openai import OpenAI
+import time
 
 client = OpenAI(api_key='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')
 
@@ -191,14 +192,10 @@ def get_all_unique_zip():
     zips = [zip[0] for zip in zips]
     return zips
 
-import time
 
-zipCodes = get_all_unique_zip()
-current_time = time.time()
 time_interval = 60*10
 while(True):
-    if(((time.time() - current_time()) / 600) < 1):
-        time.sleep(1)
-    else:
-        for zipCode in zipCodes:
-            zip_article_search(zip_code=zipCode, search_phrase=["politics"], csv_name="news_scrape.csv")
+    zipCodes = get_all_unique_zip()
+    for zipCode in zipCodes:
+        zip_article_search(zip_code=zipCode, search_phrase=["politics"], csv_name="news_scrape.csv")
+    time.sleep(time_interval)
