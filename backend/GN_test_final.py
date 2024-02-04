@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 import sqlite3
 from openai import OpenAI
 import time
+from joblib import load
 
 client = OpenAI(api_key='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')
 
@@ -29,11 +30,12 @@ def zip_article_search(zip_code, search_phrase=["politics"], csv_name="news_scra
     for entry in df_zip['zip']:
         zip_input = entry
     """
-    zip_input = zip_code
+    zip_input = int(zip_code)
 
     df_temp = df_zip.loc[df_zip['zip'] == zip_input]
     # print(df_temp.head())
     # sub_df.iloc[0]['A']
+    # print(df_temp)
     pd_zip_towns = (df_temp.iloc[0]['primary_city'], df_temp.iloc[0]['acceptable_cities'], df_temp.iloc[0]['state'])
 
     # url = 'https://www.google.com/search?q=new+york+good+news&tbm=nws'
@@ -86,8 +88,8 @@ def zip_article_search(zip_code, search_phrase=["politics"], csv_name="news_scra
 
     for item in soup.find_all('item'):
         title = item.title.text
-        if title in titles:
-            continue
+        # if title in titles:
+        #     continue
         link = item.link.text
         publication_date = item.pubDate.text
         description = item.description.text
@@ -105,13 +107,13 @@ def zip_article_search(zip_code, search_phrase=["politics"], csv_name="news_scra
 
         article_content = get_articles_text(link)
 
-        if len(article_content) < 100:
+        if len(article_content) < 1000:
             continue
 
         bias = get_article_bias(article_content)
         summary = summarize_article(article_content)
 
-        add_article_to_db(title, article_content, summary, publication_date, None, bias, source, zip_code)
+        add_article_to_db(title, article_content, summary, publication_date, None, bias, source, zip_code, link)
 
         # Add call to the api to update the front end with the new article
 
@@ -135,11 +137,11 @@ def get_all_articles_titles():
     return titles
 
 
-def add_article_to_db(title, text, summary, date, imageData, classifierNumber, websiteName, zipCode):
+def add_article_to_db(title, text, summary, date, imageData, classifierNumber, websiteName, zipCode, link):
     conn = sqlite3.connect('../lib/citoData.db')
     c = conn.cursor()
-    c.execute('INSERT INTO articles VALUES (?, ?, ?, ?, ?)',
-              (title, text, summary, date, imageData, classifierNumber, websiteName, zipCode))
+    c.execute('INSERT INTO articles VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+              (title, text, summary, date, imageData, classifierNumber, websiteName, zipCode, link))
     conn.commit()
     conn.close()
 
@@ -166,7 +168,7 @@ def get_articles_text(url):
 
 def summarize_article(article_text):
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-0125-preview",
         messages=[
             {"role": "system", "content": "You are a politically unbiased summarizer."},
             {"role": "user",
@@ -179,14 +181,35 @@ def summarize_article(article_text):
     return resp
 
 
+def make_prediction(model_filename, input_text):
+    # Load the trained pipeline
+    pipeline = load(model_filename)
+
+    # Assuming the pipeline has a TfidfVectorizer as the first step and SVC as the second
+    tfidf_vectorizer = pipeline.named_steps['tfidfvectorizer']
+    svm_model = pipeline.named_steps['svc']
+
+    # Transform the input text using the loaded vectorizer
+    input_text_transformed = tfidf_vectorizer.transform([input_text])
+
+    # Make a prediction
+    prediction = svm_model.predict(input_text_transformed)
+    return prediction[0]
+
 def get_article_bias(article_text):
-    return 0
+    model_filename = 'bias_classifier.joblib'
+
+    prediction = make_prediction(model_filename, article_text)
+
+    print(f"Prediction: {prediction}")
+
+    return int(prediction)
 
 
 def get_all_unique_zip():
     conn = sqlite3.connect('../lib/citoData.db')
     c = conn.cursor()
-    c.execute('SELECT DISTINCT zipCode FROM articles')
+    c.execute('SELECT DISTINCT zipCode FROM devices')
     zips = c.fetchall()
     conn.close()
     zips = [zip[0] for zip in zips]
@@ -197,5 +220,5 @@ time_interval = 60*10
 while(True):
     zipCodes = get_all_unique_zip()
     for zipCode in zipCodes:
-        zip_article_search(zip_code=zipCode, search_phrase=["politics"], csv_name="news_scrape.csv")
+        zip_article_search(zip_code=str(zipCode), search_phrase=["politics"], csv_name="news_scrape.csv")
     time.sleep(time_interval)
