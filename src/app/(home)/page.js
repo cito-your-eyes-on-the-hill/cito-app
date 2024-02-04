@@ -242,13 +242,13 @@ export default function Component() {
 
     return (
         <div key="1" className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-            <h1 className={style.siteTitle}>Cito.</h1>
+            <h1 className={style.siteTitle}>cito</h1>
             <Button className="ml-auto mb-4 absolute top-0 right-0 m-4" size="sm" onClick={toggleAboutModal}>
-                About Us
+                about us
             </Button>
-            <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                    Enter your ZIP code
+            <div className="grid place-items-center space-y-4">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-4xl lg:text-4xl/none text-align:center">
+                    power to own your vote
                 </h1>
                 <div className="w-full max-w-sm space-y-2">
                     <form className="flex space-x-2" onSubmit={handleSubmit}>
@@ -270,6 +270,11 @@ export default function Component() {
                         <div className="text-green-500 ml-2">{successMessage}</div>
                     )}
                 </div>
+                <div className="w-full max-w-sm space-y-2">
+                    <Button className="w-full" onClick={toggleModal}>
+                        Get Your Latest News
+                    </Button>
+                </div>
                 <Button type="sendNotification" onClick={async () => {
                     const subscription = await requestNotificationPermission();
                     if (subscription) {
@@ -287,13 +292,9 @@ export default function Component() {
                         }
                     }
                 }}>
-                    Send Notification
+                    Keep Me Updated
                 </Button>
-                <div className="w-full max-w-sm space-y-2">
-                    <Button className="w-full" onClick={toggleModal}>
-                        View Latest News
-                    </Button>
-                </div>
+
             </div>
             <Modal isOpen={isModalOpen} onClose={toggleModal}>
                 <h2 className="text-3xl font-bold text-center my-4">Latest News</h2>
