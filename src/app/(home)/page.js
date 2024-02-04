@@ -174,10 +174,10 @@ export default function Component() {
 
 
     const teamMembers = [
-        { id: 1, name: "Adriel", description: "This is a sample description. It is done to see how it would look on the website with the proper implementation.", imageUrl: "/profile1.png" },
-        { id: 2, name: "Nico", description: "Description 2", imageUrl: "/profile2.png" },
-        { id: 3, name: "Esteeven", description: "Description 3", imageUrl: "/profile3.png" },
-        { id: 4, name: "Bo", description: "Description 4", imageUrl: "/profile4.png" },
+        { id: 1, name: "Adriel Fung", description: "Adriel is a senior studying computer science at Queens College. He contributed towards front-end design, ML implementation, and database management.", imageUrl: "/profile1.png" },
+        { id: 2, name: "Nico de la Cruz", description: "Junior in Electrical Engineering at Columbia SEAS. He contributed to the back-end web scraping.", imageUrl: "/profile2.png" },
+        { id: 3, name: "Esteeven Cepeda", description: "A senior studying computer science in SEAS at Columbia. He contributed towards the creation of the front-end, database creation, and back-end.", imageUrl: "/profile3.png" },
+        { id: 4, name: "Bo Kizildag", description: "Junior in Computer Science at Columbia SEAS. He contributed to the ML modeling and front-end.", imageUrl: "/profile4.png" },
     ];
 
 
@@ -312,7 +312,7 @@ export default function Component() {
                         }
                     }
                 }}>
-                    Keep Me Updated
+                    Test Notification
                 </Button>
 
             </div>
