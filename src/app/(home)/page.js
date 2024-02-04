@@ -7,12 +7,77 @@ import { Modal } from "@/components/Modal/modal";
 import React, {useEffect, useState} from "react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import style from "./styles.module.scss";
+// import { doInsert } from "lib/database";
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 export default function Component() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedArticle, setSelectedArticle] = useState(null); // New state
+
+
+    const [zipCode, setZipCode] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [deviceID, setDeviceID] = useState(''); // New state
+
+    const isValidZipCode = (zipCode) => {
+        const zipCodePattern = /^\d{5}(-\d{4})?$/;
+        return zipCodePattern.test(zipCode);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        // Ensure the deviceId cookie is set
+        setDeviceID(setDeviceIdCookie())
+
+        console.log(deviceID)
+
+        // const deviceID = uuidv4(); // Generate a random UUID for phone ID
+        const apiUrl = `/api/add-user?`;
+
+
+        // Validate ZIP code before making an API call
+        if (!isValidZipCode(zipCode)) {
+            setErrorMessage('Invalid ZIP code entered.');
+            return;
+        } else {
+            setErrorMessage(''); // Clear error message on valid submission
+        }
+
+        const params = new URLSearchParams({ deviceID: deviceID, zipCode: zipCode });
+
+        try {
+            const response = await fetch(apiUrl + params);
+            console.log(response)
+            const data = await response.json();
+
+            // Handle response here (e.g., show a success message)
+            console.log(data);
+        } catch (error) {
+            // Handle errors here (e.g., show an error message)
+            console.error('Error submitting form:', error);
+        }
+    };
+
+
+    const setDeviceIdCookie = () => {
+       setDeviceID(getCookie('deviceId'));
+       console.log(`Device ID: ${deviceID}`);
+        if (!deviceID) {
+            setDeviceID(uuidv4());
+            document.cookie = `deviceId=${deviceID}; path=/; max-age=31536000`; // Expires in 1 year
+        }
+        return deviceID;
+    };
+
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    };
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -101,10 +166,20 @@ export default function Component() {
                     Enter your ZIP code
                 </h1>
                 <div className="w-full max-w-sm space-y-2">
-                    <form className="flex space-x-2">
-                        <Input className="max-w-lg flex-1" placeholder="Enter your ZIP code" type="text" />
+                    <form className="flex space-x-2" onSubmit={handleSubmit}>
+                        <Input
+                            className="max-w-lg flex-1"
+                            placeholder="Enter your ZIP code"
+                            type="text"
+                            value={zipCode}
+                            onChange={(e) => {
+                                setZipCode(e.target.value)}}
+                        />
                         <Button type="submit">Submit</Button>
                     </form>
+                    {errorMessage && (
+                        <div className="text-red-500 ml-2">{errorMessage}</div>
+                    )}
                 </div>
                 <div className="w-full max-w-sm space-y-2">
                     <Button className="w-full" onClick={toggleModal}>
