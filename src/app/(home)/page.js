@@ -158,9 +158,23 @@ export default function Component() {
         console.log(`Article Data: ${articleData}z`)
     }, []);
 
+    const biasMapping = {
+        0: 'right',
+        1: 'right-center',
+        2: 'least',
+        3: 'left-center',
+        4: 'left'
+    };
+
     const articles = articleData.slice(1, 4).map((item, index) => {
 
         const displayLink = item.link.length > 50 ? item.link.substring(0, 50) + '...' : item.link;
+
+        // const textBias = biasMapping[item.bias];
+
+        // console.log(`Text Bias: ${textBias}`)
+
+        // console.log(`Item: ${JSON.stringify(item)}`)
 
         return {
             id: index + 1,
@@ -168,7 +182,7 @@ export default function Component() {
             description: item.text.substring(0, 100) + "...",
             date: `${item.date} | Source: ${displayLink}`,
             fullLink: item.link,
-            fullText: item.summary
+            fullText: item.summary,
         };
     });
 
